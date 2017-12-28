@@ -1,7 +1,6 @@
 ﻿using DocumentDb.Repository.Infrastructure;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents.Client.TransientFaultHandling;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ namespace DocumentDB.Repository
 {
     public class DocumentDbRepository<T> : IDocumentDbRepository<T> where T : class
     {
-        private readonly IReliableReadWriteDocumentClient _client;
+        private readonly DocumentClient _client;
         private readonly string _databaseId;
 
         private readonly AsyncLazy<Database> _database;
@@ -26,7 +25,7 @@ namespace DocumentDB.Repository
         private readonly string _repositoryIdentityProperty = "id";
         private readonly string _defaultIdentityPropertyName = "id";
 
-        public DocumentDbRepository(IReliableReadWriteDocumentClient client, string databaseId, Func<string> collectionNameFactory = null, Expression<Func<T, object>> idNameFactory = null)
+        public DocumentDbRepository(DocumentClient client, string databaseId, Func<string> collectionNameFactory = null, Expression<Func<T, object>> idNameFactory = null)
         {
             _client = client;
             _databaseId = databaseId;
@@ -125,7 +124,7 @@ namespace DocumentDB.Repository
         private string TryGetIdProperty(Expression<Func<T, object>> idNameFactory)
         {
             Type entityType = typeof(T);
-            var properties = entityType.GetProperties();
+            var properties = entityType.GetRuntimeProperties();
 
             // search for idNameFactory
             if (idNameFactory != null)
@@ -163,8 +162,8 @@ namespace DocumentDB.Repository
         private void EnsurePropertyHasJsonAttributeWithCorrectPropertyName(MemberInfo idProperty)
         {
             var attributes = idProperty.GetCustomAttributes(typeof(JsonPropertyAttribute), true);
-            if (!(attributes.Length == 1 &&
-                ((JsonPropertyAttribute)attributes[0]).PropertyName == _defaultIdentityPropertyName))
+
+            if (!(attributes.Count() == 1 && ((JsonPropertyAttribute)attributes.ElementAt(0)).PropertyName == _defaultIdentityPropertyName))
             {
                 throw new ArgumentException(
                         string.Format(
@@ -209,7 +208,7 @@ namespace DocumentDB.Repository
         {
             var p = Expression.Parameter(typeof(T), "x");
             Expression body = Expression.Property(p, _repositoryIdentityProperty);
-            if (body.Type.IsValueType)
+            if (body.Type.GetTypeInfo().IsValueType)
             {
                 body = Expression.Convert(body, typeof(object));
             }
@@ -217,14 +216,14 @@ namespace DocumentDB.Repository
             return exp.Compile()(entity);
         }
 
-        private void SetValue<T, TV>(string propertyName, T item, TV value)
+        private void SetValue<TInnter, TV>(string propertyName, TInnter item, TV value)
         {
-            MethodInfo method = typeof(T).GetProperty(propertyName).GetSetMethod();
-            Action<T, TV> setter = (Action<T, TV>)Delegate.CreateDelegate(typeof(Action<T, TV>), method);
+            MethodInfo method = typeof(TInnter).GetRuntimeProperty(propertyName).GetSetMethod();
+            Action<TInnter, TV> setter = (Action<TInnter, TV>)method.CreateDelegate(typeof(Action<TInnter, TV>), method);
             setter(item, value);
         }
 
-        private MemberExpression GetMemberExpression<T>(Expression<Func<T, object>> expr)
+        private MemberExpression GetMemberExpression<TInnter>(Expression<Func<TInnter, object>> expr)
         {
             var member = expr.Body as MemberExpression;
             var unary = expr.Body as UnaryExpression;

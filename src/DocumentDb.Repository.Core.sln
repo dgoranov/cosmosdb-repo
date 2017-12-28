@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{5364877A-FA17-4D8F-B04B-53BA581F90D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentDb.Repository", "DocumentDb.Repository\DocumentDb.Repository.csproj", "{E03CFB37-99CD-419C-9578-5C1C174C5BB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentDb.Repository.Samples", "DocumentDb.Repository.Samples\DocumentDb.Repository.Samples.csproj", "{2BFC7C78-FB56-46D8-8A47-2F0A1B61D323}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E03CFB37-99CD-419C-9578-5C1C174C5BB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E03CFB37-99CD-419C-9578-5C1C174C5BB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E03CFB37-99CD-419C-9578-5C1C174C5BB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E03CFB37-99CD-419C-9578-5C1C174C5BB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BFC7C78-FB56-46D8-8A47-2F0A1B61D323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BFC7C78-FB56-46D8-8A47-2F0A1B61D323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BFC7C78-FB56-46D8-8A47-2F0A1B61D323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BFC7C78-FB56-46D8-8A47-2F0A1B61D323}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2BFC7C78-FB56-46D8-8A47-2F0A1B61D323} = {5364877A-FA17-4D8F-B04B-53BA581F90D1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D344B6D-570A-4265-A798-57C7016B8087}
+		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8
+	EndGlobalSection
+EndGlobal

@@ -1,25 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using DocumentDB.Repository;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Microsoft.Azure.Documents.Client;
+using Microsoft.Extensions.Configuration;
 using DocumentDb.Repository.Samples.Model;
-using Microsoft.Azure.Documents.Client.TransientFaultHandling;
+using DocumentDB.Repository;
 
 namespace DocumentDb.Repository.Samples
 {
-    internal class Program
+    class Program
     {
-        public static IReliableReadWriteDocumentClient Client { get; set; }
+        public static DocumentClient Client { get; set; }
+        public static IConfigurationRoot Configuration { get; set; }
 
-        private static void Main(string[] args)
+        static void Main(string[] args)
         {
             IDocumentDbInitializer init = new DocumentDbInitializer();
 
-            string endpointUrl = ConfigurationManager.AppSettings["azure.documentdb.endpointUrl"];
-            string authorizationKey = ConfigurationManager.AppSettings["azure.documentdb.authorizationKey"];
+            var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json");
+
+            Configuration = builder.Build();
+
+            string endpointUrl = Configuration["azure.documentdb.endpointUrl"];
+            string authorizationKey = Configuration["azure.documentdb.authorizationKey"];
 
             // get the Azure DocumentDB client
             Client = init.GetClient(endpointUrl, authorizationKey);
@@ -31,11 +39,11 @@ namespace DocumentDb.Repository.Samples
 
         private static async Task MainAsync(string[] args)
         {
-            string databaseId = ConfigurationManager.AppSettings["azure.documentdb.databaseId"];
+            string databaseId = Configuration["azure.documentdb.databaseId"];
 
             // create repository for persons and set Person.FullName property as identity field (overriding default Id property name)
             DocumentDbRepository<Person> repo = new DocumentDbRepository<Person>(Client, databaseId, null, p => p.FullName);
-            
+
             // output all persons in our database, nothing there yet
             await PrintPersonCollection(repo);
 
@@ -117,7 +125,7 @@ namespace DocumentDb.Repository.Samples
 
             // should output nothing
             await PrintPersonCollection(repo);
-            
+
             // remove collection
             await repo.RemoveAsync();
         }
@@ -128,5 +136,6 @@ namespace DocumentDb.Repository.Samples
 
             persons.ToList().ForEach(Console.WriteLine);
         }
+
     }
 }

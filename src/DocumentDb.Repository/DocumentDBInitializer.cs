@@ -1,13 +1,11 @@
 ﻿using System;
 using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents.Client.TransientFaultHandling;
-using Microsoft.Azure.Documents.Client.TransientFaultHandling.Strategies;
 
 namespace DocumentDB.Repository
 {
     public class DocumentDbInitializer : IDocumentDbInitializer
     {
-        public IReliableReadWriteDocumentClient GetClient(string endpointUrl, string authorizationKey, ConnectionPolicy connectionPolicy = null)
+        public DocumentClient GetClient(string endpointUrl, string authorizationKey, ConnectionPolicy connectionPolicy = null)
         {
             if (string.IsNullOrWhiteSpace(endpointUrl))
                 throw new ArgumentNullException("endpointUrl");
@@ -15,11 +13,14 @@ namespace DocumentDB.Repository
             if (string.IsNullOrWhiteSpace(authorizationKey))
                 throw new ArgumentNullException("authorizationKey");
 
-            var documentClient = new DocumentClient(new Uri(endpointUrl), authorizationKey, connectionPolicy ?? new ConnectionPolicy());
-
-            var documentRetryStrategy = new DocumentDbRetryStrategy(DocumentDbRetryStrategy.DefaultExponential) { FastFirstRetry = true };
-
-            return documentClient.AsReliable(documentRetryStrategy);
+            var documentClient = new DocumentClient(new Uri(endpointUrl),
+                                                    authorizationKey,
+                                                    connectionPolicy ?? new ConnectionPolicy()
+                                                    {
+                                                        RetryOptions = new RetryOptions() { MaxRetryAttemptsOnThrottledRequests = 3, MaxRetryWaitTimeInSeconds = 60 }
+                                                    }
+                                                    );
+            return documentClient;
         }
     }
 }
